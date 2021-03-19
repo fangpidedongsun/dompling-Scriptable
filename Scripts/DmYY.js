@@ -1,3 +1,7 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: teal; icon-glyph: cogs;
+
 /*
  * Author: 2Ya
  * Github: https://github.com/dompling
@@ -480,18 +484,19 @@ class DmYY {
       let rowTitle = row.addText(item['title']);
       rowTitle.widthWeight = 0.5;
       rowTitle.titleFont = Font.systemFont(16);
-      if (item.val) {
-        let valText = row.addText(
-          `${this.settings[item.val] || item.val}`.toUpperCase(),
-        );
-        valText.widthWeight = 0.5;
-        valText.rightAligned();
-        valText.titleColor = Color.blue();
-        valText.titleFont = Font.mediumSystemFont(16);
-      }
+
+      let valText = row.addText(
+        `${this.settings[item.val] || item.val || '💬'}`.toUpperCase(),
+      );
+      const fontSize = !item.val ? 26 : 16;
+      valText.widthWeight = 0.5;
+      valText.rightAligned();
+      valText.titleColor = Color.blue();
+      valText.titleFont = Font.mediumSystemFont(fontSize);
       row.dismissOnSelect = false;
+
       row.onSelect = item.onClick
-        ? () => item.onClick(item)
+        ? () => item.onClick(item, table)
         : async () => {
             if (item.type == 'input') {
               await this.setLightAndDark(
