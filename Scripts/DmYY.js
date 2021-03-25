@@ -481,22 +481,30 @@ class DmYY {
     table.addRow(header);
     arr.forEach((item) => {
       let row = new UITableRow();
+      row.dismissOnSelect = !!item.dismissOnSelect;
       let rowTitle = row.addText(item['title']);
       rowTitle.widthWeight = 0.5;
       rowTitle.titleFont = Font.systemFont(16);
-
-      let valText = row.addText(
-        `${this.settings[item.val] || item.val || '💬'}`.toUpperCase(),
-      );
-      const fontSize = !item.val ? 26 : 16;
-      valText.widthWeight = 0.5;
-      valText.rightAligned();
-      valText.titleColor = Color.blue();
-      valText.titleFont = Font.mediumSystemFont(fontSize);
-      row.dismissOnSelect = false;
+      if (this.settings[item.val] || item.val) {
+        let valText = row.addText(
+          `${this.settings[item.val] || item.val}`.toUpperCase(),
+        );
+        const fontSize = !item.val ? 26 : 16;
+        valText.widthWeight = 0.5;
+        valText.rightAligned();
+        valText.titleColor = Color.blue();
+        valText.titleFont = Font.mediumSystemFont(fontSize);
+      } else {
+        const imgCell = UITableCell.imageAtURL(
+          'https://gitee.com/scriptableJS/Scriptable/raw/master/images/more.png',
+        );
+        imgCell.rightAligned();
+        imgCell.widthWeight = 0.5;
+        row.addCell(imgCell);
+      }
 
       row.onSelect = item.onClick
-        ? () => item.onClick(item, table)
+        ? async () => item.onClick(item, table)
         : async () => {
             if (item.type == 'input') {
               await this.setLightAndDark(
@@ -1214,16 +1222,19 @@ const Runing = async (Widget, default_args = '', isDebug = true, extra) => {
         {
           title: '小尺寸',
           val: 'small',
+          dismissOnSelect: true,
           onClick,
         },
         {
           title: '中尺寸',
           val: 'medium',
+          dismissOnSelect: true,
           onClick,
         },
         {
           title: '大尺寸',
           val: 'large',
+          dismissOnSelect: true,
           onClick,
         },
       ];
