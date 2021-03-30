@@ -557,48 +557,49 @@ class DmYY {
   drawTableIcon = async (
     icon = 'square.grid.2x2',
     color = '#e8e8e8',
-    cornerWidth = 10,
+    cornerWidth = 42,
   ) => {
     const sfi = SFSymbol.named(icon);
-    sfi.applyFont(Font.mediumSystemFont(25));
+    sfi.applyFont(Font.mediumSystemFont(30));
     const imgData = Data.fromPNG(sfi.image).toBase64String();
     const html = `
-<img id="sourceImg" src="data:image/png;base64,${imgData}" />
-<img id="silhouetteImg" src="" />
-<canvas id="mainCanvas" />
-  `;
+    <img id="sourceImg" src="data:image/png;base64,${imgData}" />
+    <img id="silhouetteImg" src="" />
+    <canvas id="mainCanvas" />
+    `;
     const js = `
-var canvas = document.createElement("canvas");
-var sourceImg = document.getElementById("sourceImg");
-var silhouetteImg = document.getElementById("silhouetteImg");
-var ctx = canvas.getContext('2d');
-canvas.width = sourceImg.width;
-canvas.height = sourceImg.height;
-ctx.drawImage(sourceImg,0,0);
-var imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-var pix = imgData.data;
-//convert the image into a silhouette
-for (var i=0, n = pix.length; i < n; i+= 4){
-  //set red to 0
-    pix[i] = 255;
-  //set green to 0
-    pix[i+1] = 255;
-  //set blue to 0
-    pix[i+2] = 255;
-  //retain the alpha value
-    pix[i+3] = pix[i+3];
-}
-ctx.putImageData(imgData,0,0);
-silhouetteImg.src = canvas.toDataURL();
-output=canvas.toDataURL()
-`;
+    var canvas = document.createElement("canvas");
+    var sourceImg = document.getElementById("sourceImg");
+    var silhouetteImg = document.getElementById("silhouetteImg");
+    var ctx = canvas.getContext('2d');
+    canvas.width = sourceImg.width;
+    canvas.height = sourceImg.height;
+    ctx.drawImage(sourceImg,0,0);
+    var imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    var pix = imgData.data;
+    //convert the image into a silhouette
+    for (var i=0, n = pix.length; i < n; i+= 4){
+      //set red to 0
+      pix[i] = 255;
+      //set green to 0
+      pix[i+1] = 255;
+      //set blue to 0
+      pix[i+2] = 255;
+      //retain the alpha value
+      pix[i+3] = pix[i+3];
+    }
+    ctx.putImageData(imgData,0,0);
+    silhouetteImg.src = canvas.toDataURL();
+    output=canvas.toDataURL()
+    `;
     let wv = new WebView();
     await wv.loadHTML(html);
     const base64Image = await wv.evaluateJavaScript(js);
     const iconImage = await new Request(base64Image).loadImage();
-    const size = new Size(80, 80);
+    const size = new Size(160, 160);
     const ctx = new DrawContext();
     ctx.opaque = false;
+    ctx.respectScreenScale = true;
     ctx.size = size;
     const path = new Path();
     const rect = new Rect(0, 0, size.width, size.width);
@@ -608,11 +609,10 @@ output=canvas.toDataURL()
     ctx.setFillColor(new Color(color));
     ctx.addPath(path);
     ctx.fillPath();
-
-    const rate = 16;
-    const iw = size.width - rate;
-    const x = (size.width - iw) / 2;
-    ctx.drawImageInRect(iconImage, new Rect(x, x, iw, iw));
+    const imageSize = iconImage.size;
+    const x = (size.width - imageSize.width) / 2;
+    const y = (size.height - imageSize.height) / 2;
+    ctx.drawImageAtPoint(iconImage, new Point(x, y));
     return ctx.getImage();
   };
 
@@ -642,14 +642,14 @@ output=canvas.toDataURL()
         val: 'darkBgColor',
       },
       {
-        icon: { name: 'sun.max', color: '#d48806' },
+        icon: { name: 'sun.max.fill', color: '#d48806' },
         type: 'input',
         title: '白天字体颜色',
         desc: '请自行去网站上搜寻颜色（Hex 颜色）',
         val: 'lightColor',
       },
       {
-        icon: { name: 'moon.stars', color: '#d4b106' },
+        icon: { name: 'moon.stars.fill', color: '#d4b106' },
         type: 'input',
         title: '晚上字体颜色',
         desc: '请自行去网站上搜寻颜色（Hex 颜色）',
@@ -693,7 +693,7 @@ output=canvas.toDataURL()
       },
     ];
     const boxjs = {
-      icon: { name: 'shippingbox', color: '#fff566' },
+      icon: { name: 'shippingbox', color: '#f7bb10' },
       type: 'input',
       title: 'BoxJS 域名',
       desc: '',
@@ -1362,5 +1362,3 @@ const Runing = async (Widget, default_args = '', isDebug = true, extra) => {
 
 // await new DmYY().setWidgetConfig();
 module.exports = { DmYY, Runing };
-
-//version:1.0.4
